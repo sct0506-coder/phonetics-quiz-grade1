@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html manifest="cache.appcache">
+<html>
 <head>
 	<title>雄‧注音高手</title>
 	<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
@@ -27,44 +27,106 @@
   <p id="audioUnlockStatusInside" style="color:#888;margin-top:.8em;font-size:.9em"></p>
 </div>
 <script>
-// 觸控解鎖：在此頁面內建立 AudioContext / <audio> 手勢，確保後續 kf()/of() 可播放
+// 觸控解鎖：HTML5 <audio> 需在同一 document 取得使用者手勢，此腳本提供永久解鎖 + 測試 + TTS 備援
 (function(){
   const overlay=document.getElementById('audioUnlockOverlay');
   const btn=document.getElementById('audioUnlockBtnInside');
   const status=document.getElementById('audioUnlockStatusInside');
-  let unlocked=false;
+  let unlocked=false, audioCtx=null;
+  // 建立並保持一個共用 AudioContext，觸控後永久保持 resume
+  function getCtx(){
+    if(audioCtx) return audioCtx;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(AC) audioCtx=new AC();
+    return audioCtx;
+  }
   async function unlock(){
-    if(unlocked) return;
+    if(unlocked) status.textContent='✅ 已啟用，再次測試中…';
     try{
-      const AC=window.AudioContext||window.webkitAudioContext;
-      if(AC){
-        const ctx=new AC();
-        if(ctx.state==='suspended') await ctx.resume();
+      const ctx=getCtx();
+      if(ctx && ctx.state==='suspended') await ctx.resume();
+      if(ctx){
         const buf=ctx.createBuffer(1,1,22050);
         const src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); src.start(0);
-        setTimeout(()=>{try{ctx.close();}catch(e){}},600);
       }
-      // 試播一個極小聲音以解鎖 <audio> 自動播放限制
-      const a=document.createElement('audio'); a.src='assets/sound_click.mp3'; a.volume=0.02;
-      a.play().then(()=>{ setTimeout(()=>{a.pause(); a.remove();},300); }).catch(()=>{});
-      // 解鎖已存在的 audio 元素（若遊戲已載入）
-      document.querySelectorAll('audio').forEach(el=>{ el.muted=false; el.play().catch(()=>{}); el.pause(); });
-      // 若有全域函式 of/kf，也嘗試預熱
-      try{ if(window.kf && window.lf && window.sound_click_mp3){ const t=window.kf(window.lf(window.sound_click_mp3)); t.volume=0.01; t.play().catch(()=>{}); setTimeout(()=>{try{t.pause();}catch(e){}},300);} }catch(e){}
-    }catch(e){ console.log('unlock err',e); }
-    unlocked=true;
-    status.textContent='✅ 音訊已啟用，開始遊戲…';
-    btn.textContent='✅ 已啟用';
-    setTimeout(()=>{ overlay.style.display='none'; }, 500);
+      // 1) 試播本地音效（音量正常以便聽見）
+      const a=document.createElement('audio');
+      a.src='assets/sound_click.mp3';
+      a.volume=0.8;
+      await a.play();
+      // 播放成功代表已解鎖，2秒後自動隱藏
+      status.innerHTML='✅ 音訊已啟用！<br><small>若仍無聲，請檢查觸控螢幕喇叭/音量鍵，或點「測試發音」</small>';
+      a.onended=()=>{a.remove();};
+      setTimeout(()=>{ try{a.pause(); a.remove();}catch(e){} },800);
+      // 2) 猴補丁：攔截後續所有 <audio>.play，確保先 resume
+      if(!HTMLAudioElement.prototype._patched){
+        const origPlay=HTMLAudioElement.prototype.play;
+        HTMLAudioElement.prototype.play=function(){
+          if(ctx && ctx.state==='suspended') ctx.resume().catch(()=>{});
+          return origPlay.call(this);
+        };
+        HTMLAudioElement.prototype._patched=true;
+      }
+      // 3) 若遊戲已載入，預熱其原有音效函式
+      try{
+        if(window.kf && window.lf && window.sound_click_mp3){
+          const t=window.kf(window.lf(window.sound_click_mp3));
+          t.volume=0.6; t.play().catch(()=>{}); setTimeout(()=>{try{t.pause();}catch(e){}},600);
+        }
+        // 解鎖現存 audio 標籤
+        document.querySelectorAll('audio').forEach(el=>{ el.muted=false; });
+      }catch(e){}
+      unlocked=true;
+      btn.textContent='✅ 已啟用 - 點此測試發音';
+      // 4) TTS 備援：若 Google TTS 被擋，改用 Web Speech API
+      if(!window._ttsPatched && window.speechSynthesis){
+        window._ttsPatched=true;
+        const origF=window.Ff;
+        // 在遊戲載入後才有 Ff，先輪詢
+        const tryPatch=()=>{
+          if(typeof window.Ff==='function'){
+            const old=window.Ff;
+            window.Ff=function(a){
+              const r=old.apply(this,arguments);
+              // 監聽播放失敗時用 speechSynthesis 補救
+              setTimeout(()=>{
+                try{
+                  const snd=window.questionSound;
+                  if(snd && snd.error){ throw new Error('tts error'); }
+                }catch(e){
+                  try{
+                    const u=new SpeechSynthesisUtterance(a);
+                    u.lang='zh-TW'; u.rate=0.9;
+                    speechSynthesis.speak(u);
+                    status.textContent='🔊 已改用系統語音朗讀';
+                  }catch(e2){}
+                }
+              },400);
+              return r;
+            };
+          } else setTimeout(tryPatch,500);
+        };
+        tryPatch();
+      }
+      // 點擊後 1.2 秒自動隱藏遮罩（保留按鈕可再次測試）
+      setTimeout(()=>{ overlay.style.display='none'; }, 1200);
+    }catch(e){
+      console.log('unlock err',e);
+      status.innerHTML='⚠️ 仍未成功：'+(e.message||e)+'<br><small>請確認已調高音量、未靜音，並再點一次；若用 Padlet 嵌入，請改用「全螢幕開啟」</small>';
+      // 嘗試改用 Web Speech 測試
+      try{ const u=new SpeechSynthesisUtterance('音訊測試'); u.lang='zh-TW'; speechSynthesis.speak(u); status.textContent+='（已嘗試系統語音）'; }catch(e2){}
+    }
   }
+  // 測試按鈕：已解鎖後再次點擊可重播測試
   btn.addEventListener('click', unlock);
-  btn.addEventListener('touchend', unlock, {passive:true});
-  // 父頁面 (index.html) 的解鎖按鈕可透過 postMessage 觸發此頁解鎖
+  btn.addEventListener('touchend', (e)=>{ e.preventDefault(); unlock(); }, {passive:false});
   window.addEventListener('message', (e)=>{
     if(e.data==='unlockAudio' || (e.data && e.data.type==='unlockAudio')) unlock();
   });
-  // 若使用者在遮罩外任意點擊也嘗試解鎖（提升體驗）
-  overlay.addEventListener('touchend', unlock, {passive:true});
+  // 任意觸控也嘗試解鎖
+  overlay.addEventListener('touchend', (e)=>{ if(!unlocked) unlock(); }, {passive:true});
+  // 攔截所有 touchstart 嘗試 resume（確保後續點擊不再被擋）
+  document.addEventListener('touchstart', ()=>{ const c=getCtx(); if(c && c.state==='suspended') c.resume().catch(()=>{}); }, {passive:true});
 })();
 </script>
     	<script type="text/javascript">
