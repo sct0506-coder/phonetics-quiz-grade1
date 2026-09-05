@@ -128,18 +128,7 @@
   setTimeout(()=>{ overlay.style.display='none'; }, 1500);
   // 攔截所有 touchstart 嘗試 resume（確保後續點擊不再被擋）
   document.addEventListener('touchstart', ()=>{ const c=getCtx(); if(c && c.state==='suspended') c.resume().catch(()=>{}); }, {passive:true});
-  // 中間鍵盤觸控回饋：任何點擊皆給予輕微喀聲（確保鍵盤有聲）
-  document.addEventListener('click', (e)=>{
-    if(e.target.closest('#audioUnlockOverlay')) return;
-    try{
-      const AC=window.AudioContext||window.webkitAudioContext;
-      if(AC){
-        const ctx=new AC(); const o=ctx.createOscillator(); const g=ctx.createGain();
-        o.type='sine'; o.frequency.value=720; o.connect(g); g.connect(ctx.destination);
-        g.gain.value=0.08; o.start(); setTimeout(()=>{o.stop(); try{ctx.close();}catch(e){}},90);
-      }
-    }catch(e){}
-  }, {passive:true});
+  // 已移除全域喀聲，避免蓋過題目朗讀（題目播放由 of() 的 Web Speech 備援處理）
 })();
 </script>
     	<script type="text/javascript">
@@ -170,83 +159,8 @@
 				document.getElementsByTagName('head')[0].appendChild(script);
 			}
 
-			var webappCache = window.applicationCache;
-
-			if(webappCache && window.navigator.userAgent.indexOf('WebKit') != -1){
-
-				var WIDTH = 200,
-					HEIGHT = 100;
-
-				var scripts = document.getElementsByTagName('script');
-				var script = scripts[scripts.length-1];
-				var el = document.createElement('div');
-				var parent = script.parentNode;
-				if(parent.style.position!='absolute' && parent.style.position!='relative'){
-					parent.style.cssText = 'relative';
-				}
-				var pwidth = window.innerWidth;
-				var pheight = window.innerHeight;
-				el.style.cssText = 'text-align:center;width:'+WIDTH+'px;height:'+HEIGHT+'px;position:absolute;left:'+Math.round((pwidth-WIDTH)*.5)+'px;top:'+Math.round((pheight-HEIGHT)*.5)+'px';
-				script.parentNode.insertBefore(el,script);
-				script.parentNode.removeChild(script);
-
-				var started = 0;
-
-				var close = function(){
-					if(started) return;
-					el.innerHTML = 'Starting';
-					loadJS(function(){
-						el.parentNode.removeChild(el);
-					});
-					started=1;
-					clearTimeout(timeout);
-				};
-
-				var timeout = setTimeout(function(){close()},3000);
-
-				webappCache.addEventListener('checking', function(){
-					//console.log('checking');
-					el.innerHTML = 'Initializing';
-					},false);
-
-				webappCache.addEventListener('cached', function(){
-					//console.log('cached');
-					close();
-				},false);
-
-				webappCache.addEventListener('noupdate', function(){
-					//console.log('noupdate');
-					close();
-				},false);
-
-				webappCache.addEventListener('updateready', function(){
-					//console.log('updateready');
-					webappCache.swapCache();
-					close();
-				},false);
-/*
-			webappCache.addEventListener('downloading', function(){
-					clearTimeout(timeout);
-				},false);
-
-				webappCache.addEventListener('progress', function(e){
-					console.log('progress '+e.loaded+'/'+e.total);
-					el.innerHTML = 'Loading '+e.loaded+'/'+e.total;
-				},false);
-*/
-				webappCache.addEventListener('obsolete', function(){
-					//console.log('obsolete')
-					close();
-				}, false);
-
-				webappCache.addEventListener('error', function(e){
-					//console.log('error');
-					close();
-				}, false);
-			}
-			else {
-				loadJS(function(){});
-			}
+			// 已移除 AppCache 等待（原 3000ms），改為立即載入，確保 PLAY 一鍵可按
+			loadJS(function(){});
 
 		})('phonetics_quiz.js','phonetics_quiz.start');
 
