@@ -124,6 +124,8 @@
   });
   // 任意觸控也嘗試解鎖
   overlay.addEventListener('touchend', (e)=>{ if(!unlocked) unlock(); }, {passive:true});
+  // 1.5秒後自動隱藏提示條，不擋 PLAY（一鍵進入）
+  setTimeout(()=>{ overlay.style.display='none'; }, 1500);
   // 攔截所有 touchstart 嘗試 resume（確保後續點擊不再被擋）
   document.addEventListener('touchstart', ()=>{ const c=getCtx(); if(c && c.state==='suspended') c.resume().catch(()=>{}); }, {passive:true});
 })();
@@ -234,7 +236,7 @@
 				loadJS(function(){});
 			}
 
-		})('phonetics_quiz.js','phonetics_quiz.start');
+		})('phonetics_quiz.js?v=20260905_1400','phonetics_quiz.start');
 
 		</script>
 </body>
