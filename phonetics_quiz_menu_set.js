@@ -7,5 +7,6 @@ menu_title='注音高手';
 menu_items = new Array(
  '第一單元 學校真快樂,question-set-1.js'
 ,'第二單元 我的家,question-set-2.js'
+,'第八課 課文生詞,question-set-8.js'
 );
 
