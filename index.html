@@ -32,6 +32,7 @@ footer{text-align:center;color:#aaa;font-size:.85em;padding:1.2em}
 <header>
   <h1>🌸 一年級歡樂學習網</h1>
   <p>南一版首冊｜注音高手・分頁學習 Padlet 友善版</p>
+  <p style="margin-top:.7em"><button id="audioUnlockBtn" style="background:#fff;color:#e05272;border:0;border-radius:999px;padding:.6em 1.4em;font-size:1.05em;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18)">🔊 點擊啟用音訊（觸控螢幕請先點此）</button> <span id="audioStatus" style="margin-left:.5em;font-size:.9em;opacity:.9"></span></p>
 </header>
 
 <nav class="tabs" role="tablist" aria-label="學習分頁">
@@ -91,6 +92,46 @@ footer{text-align:center;color:#aaa;font-size:.85em;padding:1.2em}
 <footer>© 2026 一年級歡樂學習網｜GitHub Pages + Padlet 4分頁版</footer>
 
 <script>
+// 觸控螢幕音訊解鎖：需使用者手勢才能播放聲音
+(function(){
+  const btn=document.getElementById('audioUnlockBtn');
+  const status=document.getElementById('audioStatus');
+  let unlocked=false;
+  async function unlock(){
+    if(unlocked) return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(AC){
+        const ctx=new AC();
+        if(ctx.state==='suspended') await ctx.resume();
+        // 播放極短靜音緩衝以解鎖
+        const buf=ctx.createBuffer(1,1,22050);
+        const src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); src.start(0);
+        // 同時嘗試解鎖 iframe 內的 audio
+        const quizFrame=document.querySelector('iframe.quiz');
+        try{
+          const audios=quizFrame?.contentWindow?.document?.querySelectorAll('audio');
+          audios?.forEach(a=>{ a.muted=false; a.play().catch(()=>{}); a.pause(); });
+        }catch(e){}
+        // 試播一小段點擊音（若存在）
+        const a=document.createElement('audio'); a.src='assets/sound_click.mp3'; a.volume=0.01;
+        await a.play().catch(()=>{});
+        setTimeout(()=>{ try{ctx.close();}catch(e){} },500);
+      }
+      unlocked=true;
+      btn.textContent='✅ 音訊已啟用';
+      btn.style.background='#e8ffe8'; btn.style.color='#2d7a2d';
+      status.textContent='現在可正常播放注音與答題音效';
+      btn.disabled=true;
+    }catch(e){
+      status.textContent='已嘗試啟用，若無聲請再點一次';
+    }
+  }
+  btn.addEventListener('click', unlock);
+  btn.addEventListener('touchend', unlock, {passive:true});
+  // 任意點擊也能解鎖（提升觸控體驗）
+  document.addEventListener('touchend', function once(){ if(!unlocked) unlock(); document.removeEventListener('touchend', once); }, {passive:true});
+})();
 const btns=[...document.querySelectorAll('.tab-btn')];
 const panels=[...document.querySelectorAll('.panel')];
 btns.forEach(b=>b.addEventListener('click',()=>{
