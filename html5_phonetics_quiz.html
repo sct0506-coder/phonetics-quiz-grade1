@@ -19,7 +19,55 @@
 	<link rel="apple-touch-startup-image" href="assets/startup.png" media="screen and (max-device-width: 320px)" />
 </head>
 <body>
-   	<script type="text/javascript">
+<!-- 觸控螢幕音訊解鎖遮罩：HTML5 遊戲需使用者手勢才能播放聲音 -->
+<div id="audioUnlockOverlay" style="position:fixed;inset:0;z-index:9999;background:rgba(255,246,248,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2em;">
+  <p style="font-size:1.4em;margin:.4em 0;color:#e05272;font-weight:700">🔊 觸控螢幕請先啟用音訊</p>
+  <p style="color:#666;margin:.2em 0 1em">點擊下方按鈕後，注音朗讀與答題音效才會正常播放</p>
+  <button id="audioUnlockBtnInside" style="background:#ff6b8a;color:#fff;border:0;border-radius:999px;padding:.9em 2em;font-size:1.25em;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,138,.4);min-width:260px;min-height:56px">👆 點擊啟用音訊並開始</button>
+  <p id="audioUnlockStatusInside" style="color:#888;margin-top:.8em;font-size:.9em"></p>
+</div>
+<script>
+// 觸控解鎖：在此頁面內建立 AudioContext / <audio> 手勢，確保後續 kf()/of() 可播放
+(function(){
+  const overlay=document.getElementById('audioUnlockOverlay');
+  const btn=document.getElementById('audioUnlockBtnInside');
+  const status=document.getElementById('audioUnlockStatusInside');
+  let unlocked=false;
+  async function unlock(){
+    if(unlocked) return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(AC){
+        const ctx=new AC();
+        if(ctx.state==='suspended') await ctx.resume();
+        const buf=ctx.createBuffer(1,1,22050);
+        const src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); src.start(0);
+        setTimeout(()=>{try{ctx.close();}catch(e){}},600);
+      }
+      // 試播一個極小聲音以解鎖 <audio> 自動播放限制
+      const a=document.createElement('audio'); a.src='assets/sound_click.mp3'; a.volume=0.02;
+      a.play().then(()=>{ setTimeout(()=>{a.pause(); a.remove();},300); }).catch(()=>{});
+      // 解鎖已存在的 audio 元素（若遊戲已載入）
+      document.querySelectorAll('audio').forEach(el=>{ el.muted=false; el.play().catch(()=>{}); el.pause(); });
+      // 若有全域函式 of/kf，也嘗試預熱
+      try{ if(window.kf && window.lf && window.sound_click_mp3){ const t=window.kf(window.lf(window.sound_click_mp3)); t.volume=0.01; t.play().catch(()=>{}); setTimeout(()=>{try{t.pause();}catch(e){}},300);} }catch(e){}
+    }catch(e){ console.log('unlock err',e); }
+    unlocked=true;
+    status.textContent='✅ 音訊已啟用，開始遊戲…';
+    btn.textContent='✅ 已啟用';
+    setTimeout(()=>{ overlay.style.display='none'; }, 500);
+  }
+  btn.addEventListener('click', unlock);
+  btn.addEventListener('touchend', unlock, {passive:true});
+  // 父頁面 (index.html) 的解鎖按鈕可透過 postMessage 觸發此頁解鎖
+  window.addEventListener('message', (e)=>{
+    if(e.data==='unlockAudio' || (e.data && e.data.type==='unlockAudio')) unlock();
+  });
+  // 若使用者在遮罩外任意點擊也嘗試解鎖（提升體驗）
+  overlay.addEventListener('touchend', unlock, {passive:true});
+})();
+</script>
+    	<script type="text/javascript">
 		(function(name,callback){
 
 			var getObjectByName = function(name, opt_obj) {
