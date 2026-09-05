@@ -1,21 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="refresh" content="0; url=html5_phonetics_quiz.html">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>一年級注音高手｜南一版</title>
-<link rel="canonical" href="html5_phonetics_quiz.html">
-<style>body{font-family:sans-serif;text-align:center;padding:3em;line-height:1.8}</style>
+<title>一年級歡樂學習網｜南一版首冊 注音練習・Padlet 4分頁</title>
+<style>
+:root{--pink:#ff6b8a;--pink-dark:#e05272;--bg:#fff6f8;--tab:#fff;--border:#ffd1dc}
+*{box-sizing:border-box} body{margin:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:#333}
+header{background:linear-gradient(135deg,#ff8fa3,#ff6b8a);color:#fff;padding:1.2em 1em;text-align:center}
+header h1{margin:0;font-size:1.6em;letter-spacing:0.05em} header p{margin:.4em 0 0;opacity:.95;font-size:.95em}
+.tabs{display:flex;gap:.5em;justify-content:center;padding:.8em 1em .4em;flex-wrap:wrap;background:#fff;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10}
+.tab-btn{border:2px solid var(--border);background:var(--tab);border-radius:999px;padding:.55em 1.2em;cursor:pointer;font-size:1em;transition:.15s}
+.tab-btn.active{background:var(--pink);color:#fff;border-color:var(--pink);font-weight:700;box-shadow:0 2px 8px rgba(255,107,138,.4)}
+.tab-btn:hover{transform:translateY(-1px)}
+.panels{max-width:1100px;margin:0 auto;padding:1em}
+.panel{display:none;animation:fade .2s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:1em 1.2em;box-shadow:0 4px 14px rgba(0,0,0,.06);margin-bottom:1em}
+.card h2{margin:.2em 0 .3em;font-size:1.25em;color:var(--pink-dark)} .hint{color:#888;font-size:.9em}
+iframe.quiz{width:100%;height:78vh;min-height:520px;border:1.5px solid var(--border);border-radius:12px;background:#fff}
+.empty{border:2px dashed var(--border);border-radius:16px;padding:2.2em 1em;text-align:center;background:#fff;color:#888}
+.empty b{color:var(--pink-dark)}
+a.btn{display:inline-block;background:var(--pink);color:#fff;text-decoration:none;padding:.6em 1.1em;border-radius:999px;margin-top:.6em}
+a.btn:hover{background:var(--pink-dark)}
+footer{text-align:center;color:#aaa;font-size:.85em;padding:1.2em}
+@media(max-width:600px){iframe.quiz{height:72vh} header h1{font-size:1.3em}}
+</style>
 </head>
 <body>
-<p>正在載入 <strong>一年級注音高手</strong> …</p>
-<p>若未自動跳轉，請點 <a href="html5_phonetics_quiz.html">進入遊戲</a></p>
-<!-- Padlet 嵌入說明：
-  直接將以下網址貼到 Padlet「新增連結」或「Embed」：
-  https://sct0506-coder.github.io/phonetics-quiz-grade1/html5_phonetics_quiz.html
-  或首頁自動跳轉：
-  https://sct0506-coder.github.io/phonetics-quiz-grade1/
--->
+<header>
+  <h1>🌸 一年級歡樂學習網</h1>
+  <p>南一版首冊｜注音高手・分頁學習 Padlet 友善版</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="學習分頁">
+  <button class="tab-btn active" data-tab="tab1" role="tab" aria-selected="true">📝 分頁一｜注音練習</button>
+  <button class="tab-btn" data-tab="tab2" role="tab">📚 分頁二｜空白備用</button>
+  <button class="tab-btn" data-tab="tab3" role="tab">🎨 分頁三｜空白備用</button>
+  <button class="tab-btn" data-tab="tab4" role="tab">⭐ 分頁四｜空白備用</button>
+</nav>
+
+<div class="panels">
+  <!-- Tab 1: 注音練習 -->
+  <section id="tab1" class="panel active" role="tabpanel">
+    <div class="card">
+      <h2>第七課 布萊梅樂隊・第八課 小蝌蚪找媽媽</h2>
+      <p class="hint">聽音選字模式（範例3設定：打完注音不用選國字、國字變框框）｜直接在下方遊戲作答，Padlet 貼此首頁連結即可全班使用</p>
+      <p><a class="btn" href="html5_phonetics_quiz.html" target="_blank" rel="noopener">🔗 全螢幕開啟遊戲</a></p>
+    </div>
+    <iframe class="quiz" src="html5_phonetics_quiz.html" title="注音高手遊戲" loading="lazy" allow="autoplay"></iframe>
+    <div class="card" style="margin-top:1em">
+      <h2>Padlet 使用說明</h2>
+      <p class="hint">在 Padlet 新增一個「連結」卡，貼上：<br><code>https://sct0506-coder.github.io/phonetics-quiz-grade1/</code><br>學生點開即見 4 個分頁，第一頁就是遊戲。</p>
+    </div>
+  </section>
+
+  <!-- Tab 2: 空白 -->
+  <section id="tab2" class="panel" role="tabpanel">
+    <div class="empty">
+      <p><b>分頁二｜空白備用</b></p>
+      <p>老師可在此放入：學習單、影片、相簿、連結等</p>
+      <p class="hint">編輯方式：打開 <code>index.html</code> 找到 <code>id="tab2"</code> 區塊，貼上你的內容後 commit → PR → 合併即更新</p>
+    </div>
+    <div class="card">
+      <h2>範例：可放嵌入內容</h2>
+      <p class="hint">例：<code>&lt;iframe src="你的連結"&gt;&lt;/iframe&gt;</code> 或圖片、YouTube 嵌入碼</p>
+    </div>
+  </section>
+
+  <!-- Tab 3: 空白 -->
+  <section id="tab3" class="panel" role="tabpanel">
+    <div class="empty">
+      <p><b>分頁三｜空白備用</b></p>
+      <p>預留給作品展示、聯絡事項或親師叮嚀</p>
+      <p class="hint">同樣編輯 <code>index.html</code> 的 <code>id="tab3"</code> 即可</p>
+    </div>
+  </section>
+
+  <!-- Tab 4: 空白 -->
+  <section id="tab4" class="panel" role="tabpanel">
+    <div class="empty">
+      <p><b>分頁四｜空白備用</b></p>
+      <p>預留給未來擴充（例如第九課、學習回饋表單）</p>
+      <p class="hint">需要我幫你直接填入內容，告訴我貼上什麼就行</p>
+    </div>
+  </section>
+</div>
+
+<footer>© 2026 一年級歡樂學習網｜GitHub Pages + Padlet 4分頁版</footer>
+
+<script>
+const btns=[...document.querySelectorAll('.tab-btn')];
+const panels=[...document.querySelectorAll('.panel')];
+btns.forEach(b=>b.addEventListener('click',()=>{
+  btns.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});
+  panels.forEach(p=>p.classList.remove('active'));
+  b.classList.add('active'); b.setAttribute('aria-selected','true');
+  document.getElementById(b.dataset.tab).classList.add('active');
+  // 讓第一頁 iframe 在切回時重整高度（避免空白）
+  if(b.dataset.tab==='tab1'){ const f=document.querySelector('iframe.quiz'); if(f) f.style.height=f.style.height; }
+  // 更新 URL hash 方便分享特定分頁
+  history.replaceState(null,'','#'+b.dataset.tab);
+}));
+// 支援直接用 hash 開指定分頁： example.com/#tab3
+(function(){
+  const h=location.hash.replace('#','');
+  if(h && document.getElementById(h)){ document.querySelector(`[data-tab="${h}"]`)?.click(); }
+})();
+</script>
 </body>
 </html>
