@@ -128,6 +128,18 @@
   setTimeout(()=>{ overlay.style.display='none'; }, 1500);
   // 攔截所有 touchstart 嘗試 resume（確保後續點擊不再被擋）
   document.addEventListener('touchstart', ()=>{ const c=getCtx(); if(c && c.state==='suspended') c.resume().catch(()=>{}); }, {passive:true});
+  // 中間鍵盤觸控回饋：任何點擊皆給予輕微喀聲（確保鍵盤有聲）
+  document.addEventListener('click', (e)=>{
+    if(e.target.closest('#audioUnlockOverlay')) return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(AC){
+        const ctx=new AC(); const o=ctx.createOscillator(); const g=ctx.createGain();
+        o.type='sine'; o.frequency.value=720; o.connect(g); g.connect(ctx.destination);
+        g.gain.value=0.08; o.start(); setTimeout(()=>{o.stop(); try{ctx.close();}catch(e){}},90);
+      }
+    }catch(e){}
+  }, {passive:true});
 })();
 </script>
     	<script type="text/javascript">
