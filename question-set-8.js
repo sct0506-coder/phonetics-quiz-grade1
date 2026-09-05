@@ -19,13 +19,13 @@ order_by_random = true;
 //虛擬鍵盤是否要選國字
 //  true :需自己選國字  false :自動選字
 //------------------------------
-character_select_enabled = true;
+character_select_enabled = false;  //false 打完注音不用選國字 (套用範例3設定)
 
 //------------------------------
 //題目中是否顯示國字
 //  true :顯示國字  false :國字變成框框
 //------------------------------
-show_character = true;
+show_character = false;	 //false 國字都變框框(只能聽,好難!) (套用範例3設定)
 
 //------------------------------
 //設定每一回要出多少題給使用者做答
