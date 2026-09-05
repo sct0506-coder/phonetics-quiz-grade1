@@ -107,11 +107,10 @@ footer{text-align:center;color:#aaa;font-size:.85em;padding:1.2em}
         // 播放極短靜音緩衝以解鎖
         const buf=ctx.createBuffer(1,1,22050);
         const src=ctx.createBufferSource(); src.buffer=buf; src.connect(ctx.destination); src.start(0);
-        // 同時嘗試解鎖 iframe 內的 audio
-        const quizFrame=document.querySelector('iframe.quiz');
+        // 通知 iframe 內頁解鎖（HTML5 遊戲需在自身 document 內有手勢）
         try{
-          const audios=quizFrame?.contentWindow?.document?.querySelectorAll('audio');
-          audios?.forEach(a=>{ a.muted=false; a.play().catch(()=>{}); a.pause(); });
+          const quizFrame=document.querySelector('iframe.quiz');
+          quizFrame?.contentWindow?.postMessage('unlockAudio','*');
         }catch(e){}
         // 試播一小段點擊音（若存在）
         const a=document.createElement('audio'); a.src='assets/sound_click.mp3'; a.volume=0.01;
