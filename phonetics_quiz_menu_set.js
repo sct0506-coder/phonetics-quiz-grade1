@@ -5,7 +5,7 @@
 menu_title='注音高手';
 
 menu_items = new Array(
- '第七課 不來梅樂隊,question-set-7.js'
+ '第七課 布萊梅樂隊,question-set-7.js'
 ,'第八課 小蝌蚪找媽媽,question-set-8.js'
 );
 
